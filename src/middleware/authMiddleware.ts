@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 import AppError from "../utils/AppError.js";
+import { verifyAdminService } from "../services/userService.js";
 
 interface JwtPayload {
   userId: string;
@@ -27,6 +28,20 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
   }
 
   req.userId = decoded.userId;
+
+  next();
+};
+
+export const verifyAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (!req.userId) {
+    throw new AppError("Authentication required", 401);
+  }
+
+  await verifyAdminService(req.userId!);
 
   next();
 };

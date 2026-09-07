@@ -38,7 +38,7 @@ router.post(
   "/reset-password",
   validate(passwordResetSchema),
   verifyPasswordResetToken,
-  resetPassword,
+  asyncHandler(resetPassword),
 );
 
 export default router;

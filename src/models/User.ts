@@ -12,7 +12,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  phonenUmber?: string;
+  phoneNumber?: string;
   profilePicture?: string;
   role: "user" | "admin";
   billingAddress: IAddress;
@@ -63,7 +63,7 @@ const userSchema = new Schema<IUser>(
       required: true,
       minLength: 6,
     },
-    phonenUmber: {
+    phoneNumber: {
       type: String,
       trim: true,
     },
