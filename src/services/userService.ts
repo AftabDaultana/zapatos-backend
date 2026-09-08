@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import AppError from "../utils/AppError.js";
+import { getPagination } from "../utils/pagination.js";
 import { sendEmail } from "./emailService.js";
 
 export const verifyAdminService = async (userId: string) => {
@@ -16,12 +17,27 @@ export const verifyAdminService = async (userId: string) => {
   return user;
 };
 
-export const getAllUsersService = async () => {
-  const users = await User.find().select(
-    "-password -createdAt -updatedAt -__v",
-  );
+export const getAllUsersService = async (page: number, limit: number) => {
+  const { skip } = getPagination({ page, limit });
 
-  return users;
+  const users = await User.find()
+    .select("-password -createdAt -updatedAt -__v")
+    .skip(skip)
+    .limit(limit);
+
+  const totalUsers = await User.countDocuments();
+
+  const totalPages = Math.ceil(totalUsers / limit);
+
+  return {
+    users,
+    pagination: {
+      page,
+      limit,
+      totalUsers,
+      totalPages,
+    },
+  };
 };
 
 export const getUserByIdService = async (userId: string) => {

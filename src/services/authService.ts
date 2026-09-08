@@ -141,9 +141,17 @@ export const resetPasswordService = async (
   userId: string,
 ) => {
   const user = await User.findOne({ _id: userId });
+  const otp = await PasswordReset.findOne({
+    userId: user?._id,
+    isVerified: true,
+  });
 
   if (!user) {
     throw new AppError("User does not exist", 404);
+  }
+
+  if (!otp) {
+    throw new AppError("No OTP found for the current user", 404);
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);

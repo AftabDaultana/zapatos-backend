@@ -11,12 +11,16 @@ import {
 import { uploadImageToCloudinary } from "../services/cloudinaryService.js";
 
 export const getAllUsers = async (req: Request, res: Response) => {
-  const users = await getAllUsersService();
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  const result = await getAllUsersService(page, limit);
 
   return res.status(200).json({
     success: true,
     message: "Users found",
-    data: users,
+    data: result.users,
+    pagination: result.pagination,
   });
 };
 

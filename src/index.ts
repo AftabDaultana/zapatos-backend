@@ -2,12 +2,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
-import cookieParser from "cookie-parser";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { seedAdmin } from "./utils/seedAdmin.js";
 import { notFoundMiddleware } from "./middleware/notFoundMiddleware.js";
@@ -19,6 +20,12 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
