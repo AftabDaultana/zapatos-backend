@@ -4,6 +4,7 @@ import AppError from "../utils/AppError.js";
 import { generateToken } from "../utils/generateToken.js";
 import PasswordReset from "../models/passwordReset.js";
 import { generateOTP } from "../utils/generateOTP.js";
+import { sendEmail } from "./emailService.js";
 
 export const registerService = async (
   name: string,
@@ -24,6 +25,12 @@ export const registerService = async (
     password: hashedPassword,
   });
 
+  await sendEmail({
+    to: user.email,
+    subject: "Welcome to Zapatos",
+    text: `Hello ${user.name}, Your Zapatos account is created successfully.`,
+  });
+
   return user;
 };
 
@@ -36,6 +43,13 @@ export const loginService = async (
 
   if (!user) {
     throw new AppError("User with the provided email does not exist", 401);
+  }
+
+  if (user.status !== "active") {
+    throw new AppError(
+      "Your account is disabled. Please contact support.",
+      403,
+    );
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -87,8 +101,13 @@ export const forgotPasswordService = async (email: string) => {
 
   const passwordResetToken = generateToken(existingUser._id.toString(), "20m");
 
+  await sendEmail({
+    to: existingUser.email,
+    subject: "Zapatos Reset Password OTP",
+    text: `Your Zapatos reset password OTP: ${otp}. Do not share this OTP with anyone. This OTP will expire in 5 minutes`,
+  });
+
   return {
-    otp,
     passwordResetToken,
   };
 };
@@ -133,6 +152,12 @@ export const resetPasswordService = async (
   await user.save();
 
   await PasswordReset.deleteOne({ userId: user._id });
+
+  await sendEmail({
+    to: user.email,
+    subject: "Zapatos Password Reset Successfully",
+    text: `Hello ${user.name}, your Zapatos password has been reset successfully.`,
+  });
 
   return user;
 };

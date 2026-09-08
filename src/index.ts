@@ -12,6 +12,8 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { seedAdmin } from "./utils/seedAdmin.js";
 import { notFoundMiddleware } from "./middleware/notFoundMiddleware.js";
 
+import "./services/emailService.js";
+
 const app = express();
 const port = process.env.PORT || 3000;
 

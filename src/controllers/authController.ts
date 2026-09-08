@@ -66,7 +66,7 @@ export const logout = (req: Request, res: Response) => {
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
 
-  const { otp, passwordResetToken } = await forgotPasswordService(email);
+  const { passwordResetToken } = await forgotPasswordService(email);
 
   res.cookie("passwordResetToken", passwordResetToken, {
     httpOnly: true,
@@ -77,8 +77,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
   return res.status(200).json({
     success: true,
-    message: "OTP generated successfully",
-    OTP: otp,
+    message: "OTP generated successfully and has been sent to your email.",
   });
 };
 

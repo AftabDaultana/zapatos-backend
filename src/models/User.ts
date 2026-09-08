@@ -15,6 +15,7 @@ export interface IUser extends Document {
   phoneNumber?: string;
   profilePicture?: string;
   role: "user" | "admin";
+  status: "active" | "inactive";
   billingAddress: IAddress;
   shippingAddress: IAddress;
   createdAt: Date;
@@ -75,6 +76,11 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
     },
     billingAddress: {
       type: addressSchema,

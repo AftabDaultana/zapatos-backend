@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import AppError from "../utils/AppError.js";
 import {
-  deleteUserService,
+  deactivateUserService,
   getAllUsersService,
   getUserByIdService,
   updateUserService,
@@ -78,13 +78,13 @@ export const updateCurrentUser = async (req: Request, res: Response) => {
   });
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deactivateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  await deleteUserService(id as string);
+  await deactivateUserService(id as string);
 
   return res.status(200).json({
     success: true,
-    message: "User deleted successfully",
+    message: "User deactivated successfully",
   });
 };

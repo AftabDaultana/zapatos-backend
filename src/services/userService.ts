@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import AppError from "../utils/AppError.js";
+import { sendEmail } from "./emailService.js";
 
 export const verifyAdminService = async (userId: string) => {
   const user = await User.findById(userId).select("role");
@@ -75,7 +76,7 @@ export const updateUserService = async (
   return user;
 };
 
-export const deleteUserService = async (userId: string) => {
+export const deactivateUserService = async (userId: string) => {
   const user = await User.findById(userId);
 
   if (!user) {
@@ -86,7 +87,18 @@ export const deleteUserService = async (userId: string) => {
     throw new AppError("Admin user cannot be deleted", 403);
   }
 
-  await User.deleteOne({ _id: user._id });
+  if (user.status === "inactive") {
+    throw new AppError("User account is already deactivated.", 400);
+  }
+
+  user.status = "inactive";
+  await user.save();
+
+  await sendEmail({
+    to: user.email,
+    subject: "Zapatos Account Disabled.",
+    text: `Hello ${user.name}, your Zapatos account has been disabled. Please contact support for further assistance.`,
+  });
 
   return user;
 };
