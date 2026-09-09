@@ -1,4 +1,5 @@
 import jwt, { SignOptions } from "jsonwebtoken";
+import crypto from "crypto";
 
 export const generateToken = (
   userId: string,
@@ -10,5 +11,7 @@ export const generateToken = (
     throw new Error("JWT_SECRET is not defined");
   }
 
-  return jwt.sign({ userId }, secret, { expiresIn });
+  const jti = crypto.randomUUID();
+
+  return jwt.sign({ userId }, secret, { expiresIn, jwtid: jti });
 };

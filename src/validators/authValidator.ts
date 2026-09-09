@@ -25,4 +25,5 @@ export const verifyOTPSchema = Joi.object({
 
 export const passwordResetSchema = Joi.object({
   newPassword: Joi.string().required().min(6).max(18),
+  confirmNewPassword: Joi.string().required().min(6).max(18),
 });

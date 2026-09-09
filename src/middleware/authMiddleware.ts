@@ -1,14 +1,20 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 import AppError from "../utils/AppError.js";
 import { verifyAdminService } from "../services/userService.js";
+import BlacklistedToken from "../models/blacklistedToken.js";
 
 interface JwtPayload {
   userId: string;
 }
 
-export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
+export const verifyUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const token = req.cookies.token;
 
   if (!token) {
@@ -25,6 +31,14 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
 
   if (typeof decoded === "string" || !decoded.userId) {
     throw new AppError("Invalid authentication token", 401);
+  }
+
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  const blackListedToken = await BlacklistedToken.findOne({ tokenHash });
+
+  if (blackListedToken) {
+    throw new AppError("Please login to continue.", 403);
   }
 
   req.userId = decoded.userId;

@@ -22,7 +22,7 @@ const router = Router();
 
 router.post("/register", validate(registerSchema), asyncHandler(register));
 router.post("/login", validate(loginSchema), asyncHandler(login));
-router.post("/logout", logout);
+router.post("/logout", asyncHandler(logout));
 router.post(
   "/forgot-password",
   validate(forgotPasswordSchema),
@@ -32,7 +32,7 @@ router.post(
   "/verify-otp",
   validate(verifyOTPSchema),
   verifyPasswordResetToken,
-  verifyOTP,
+  asyncHandler(verifyOTP),
 );
 router.post(
   "/reset-password",

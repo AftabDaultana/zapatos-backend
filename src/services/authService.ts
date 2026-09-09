@@ -1,10 +1,13 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import AppError from "../utils/AppError.js";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { generateToken } from "../utils/generateToken.js";
 import PasswordReset from "../models/passwordReset.js";
 import { generateOTP } from "../utils/generateOTP.js";
 import { sendEmail } from "./emailService.js";
+import BlacklistedToken from "../models/blacklistedToken.js";
 
 export const registerService = async (
   name: string,
@@ -24,6 +27,8 @@ export const registerService = async (
     email,
     password: hashedPassword,
   });
+
+  const token = generateToken(user._id.toString(), "1d");
 
   await sendEmail({
     to: user.email,
@@ -60,7 +65,37 @@ export const loginService = async (
 
   const token = generateToken(user._id.toString(), rememberMe ? "7d" : "1d");
 
-  return { user, token, rememberMe };
+  const userData = user.toObject();
+
+  delete (userData as any).password;
+  delete (userData as any).createdAt;
+  delete (userData as any).updatedAt;
+  delete (userData as any).__v;
+
+  return { user: userData, token, rememberMe };
+};
+
+export const logoutService = async (token: string) => {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new AppError("JWT_SECRET is not defined", 404);
+  }
+
+  const decoded = jwt.verify(token, secret);
+
+  if (typeof decoded === "string" || !decoded.exp) {
+    throw new AppError("Invalid token", 401);
+  }
+
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  const expiresAt = new Date(decoded.exp * 1000);
+
+  await BlacklistedToken.create({
+    tokenHash,
+    expiresAt,
+  });
 };
 
 export const forgotPasswordService = async (email: string) => {
@@ -138,6 +173,7 @@ export const verifyOtpService = async (userId: string, otp: string) => {
 
 export const resetPasswordService = async (
   newPassword: string,
+  confirmNewPassword: string,
   userId: string,
 ) => {
   const user = await User.findOne({ _id: userId });
@@ -152,6 +188,13 @@ export const resetPasswordService = async (
 
   if (!otp) {
     throw new AppError("No OTP found for the current user", 404);
+  }
+
+  if (confirmNewPassword !== newPassword) {
+    throw new AppError(
+      "New password and Confirm new parrword fields do not match",
+      400,
+    );
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);

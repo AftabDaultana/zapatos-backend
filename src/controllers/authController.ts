@@ -3,6 +3,7 @@ import type { Response, Request } from "express";
 import {
   forgotPasswordService,
   loginService,
+  logoutService,
   registerService,
   resetPasswordService,
   verifyOtpService,
@@ -42,15 +43,17 @@ export const login = async (req: Request, res: Response) => {
   return res.status(200).json({
     success: true,
     message: "Login successful",
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    },
+    user,
   });
 };
 
-export const logout = (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response) => {
+  const { token } = req.cookies;
+
+  if (token) {
+    await logoutService(token);
+  }
+
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
