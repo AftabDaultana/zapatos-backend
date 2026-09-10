@@ -1,5 +1,6 @@
 import Router from "express";
 import {
+  changePassword,
   deactivateUser,
   getAllUsers,
   getCurrentUser,
@@ -10,7 +11,10 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { verifyAdmin, verifyUser } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 import { validate } from "../middleware/validate.js";
-import { updateUSerSchema } from "../validators/userValidator.js";
+import {
+  changePaswwordSchema,
+  updateUSerSchema,
+} from "../validators/userValidator.js";
 
 const router = Router();
 
@@ -21,6 +25,12 @@ router.put(
   upload.single("profilePicture"),
   validate(updateUSerSchema),
   asyncHandler(updateCurrentUser),
+);
+router.put(
+  "/change-password",
+  verifyUser,
+  validate(changePaswwordSchema),
+  asyncHandler(changePassword),
 );
 
 router.get("/admin", verifyUser, verifyAdmin, asyncHandler(getAllUsers));

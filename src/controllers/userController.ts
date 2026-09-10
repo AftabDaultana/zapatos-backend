@@ -7,6 +7,7 @@ import {
   getAllUsersService,
   getUserByIdService,
   updateUserService,
+  changePasswordService,
 } from "../services/userService.js";
 import { uploadImageToCloudinary } from "../services/cloudinaryService.js";
 
@@ -90,5 +91,20 @@ export const deactivateUser = async (req: Request, res: Response) => {
   return res.status(200).json({
     success: true,
     message: "User deactivated successfully",
+  });
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  await changePasswordService(
+    req.userId!,
+    currentPassword,
+    newPassword,
+    confirmNewPassword,
+  );
+  return res.status(200).json({
+    success: true,
+    message: "Password changed successfully.",
   });
 };

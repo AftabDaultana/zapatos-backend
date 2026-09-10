@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import AppError from "../utils/AppError.js";
 import { getPagination } from "../utils/pagination.js";
 import { sendEmail } from "./emailService.js";
+import bcrypt from "bcrypt";
 
 export const verifyAdminService = async (userId: string) => {
   const user = await User.findById(userId).select("role");
@@ -117,4 +118,53 @@ export const deactivateUserService = async (userId: string) => {
   });
 
   return user;
+};
+
+export const changePasswordService = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+  confirmNewPassword: string,
+) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const matchCurrentPassword = await bcrypt.compare(
+    currentPassword,
+    user.password,
+  );
+
+  if (!matchCurrentPassword) {
+    throw new AppError("Current password is incorrect", 400);
+  }
+
+  const matchNewPassword = await bcrypt.compare(newPassword, user.password);
+
+  if (matchNewPassword) {
+    throw new AppError(
+      "Current user password and new password must not be same",
+      400,
+    );
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    throw new AppError(
+      "New password and confirm new password do not match",
+      400,
+    );
+  }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+  user.password = hashedNewPassword;
+  await user.save();
+
+  await sendEmail({
+    to: user.email,
+    subject: "Zapatos Change Password",
+    text: `Hello ${user.name}, your Zapatos account password was changed successfully. If you have not changed your password, contact support immediately.`,
+  });
 };

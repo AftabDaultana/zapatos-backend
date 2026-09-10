@@ -10,3 +10,9 @@ export const updateUSerSchema = Joi.object({
       "string.pattern.base": "Please enter a valid phone number",
     }),
 });
+
+export const changePaswwordSchema = Joi.object({
+  currentPassword: Joi.string().required().min(6).max(18),
+  newPassword: Joi.string().required().min(6).max(18),
+  confirmNewPassword: Joi.string().required().min(6).max(18),
+});
