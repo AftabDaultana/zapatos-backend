@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema, type Document } from "mongoose";
 
 export interface IBlacklistedToken extends Document {
   tokenHash: string;
@@ -6,7 +6,7 @@ export interface IBlacklistedToken extends Document {
   expiresAt: Date;
 }
 
-const blackListedTokenSchema = new mongoose.Schema<IBlacklistedToken>(
+const blackListedTokenSchema = new Schema<IBlacklistedToken>(
   {
     tokenHash: {
       type: String,
