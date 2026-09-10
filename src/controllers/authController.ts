@@ -95,9 +95,9 @@ export const verifyOTP = async (req: Request, res: Response) => {
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
-  const { newPassword } = req.body;
+  const { newPassword, confirmNewPassword } = req.body;
 
-  await resetPasswordService(newPassword, req.userId!);
+  await resetPasswordService(newPassword, confirmNewPassword, req.userId!);
 
   res.clearCookie("passwordResetToken", {
     httpOnly: true,

@@ -1,7 +1,7 @@
 import Router from "express";
 import {
   changePassword,
-  deactivateUser,
+  UpdateUserStatus,
   getAllUsers,
   getCurrentUser,
   getUserById,
@@ -35,10 +35,10 @@ router.put(
 
 router.get("/admin", verifyUser, verifyAdmin, asyncHandler(getAllUsers));
 router.get("/admin/:id", verifyUser, verifyAdmin, asyncHandler(getUserById));
-router.delete(
+router.put(
   "/admin/:id",
   verifyUser,
   verifyAdmin,
-  asyncHandler(deactivateUser),
+  asyncHandler(UpdateUserStatus),
 );
 export default router;

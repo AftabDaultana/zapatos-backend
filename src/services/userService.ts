@@ -93,7 +93,7 @@ export const updateUserService = async (
   return user;
 };
 
-export const deactivateUserService = async (userId: string) => {
+export const UpdateUserStatusService = async (userId: string) => {
   const user = await User.findById(userId);
 
   if (!user) {
@@ -105,16 +105,17 @@ export const deactivateUserService = async (userId: string) => {
   }
 
   if (user.status === "inactive") {
-    throw new AppError("User account is already deactivated.", 400);
+    user.status = "active";
+  } else {
+    user.status = "inactive";
   }
 
-  user.status = "inactive";
   await user.save();
 
   await sendEmail({
     to: user.email,
-    subject: "Zapatos Account Disabled.",
-    text: `Hello ${user.name}, your Zapatos account has been disabled. Please contact support for further assistance.`,
+    subject: "Zapatos Account Status Updated.",
+    text: `Hello ${user.name}, your Zapatos account status has been updated to "${user.status}".`,
   });
 
   return user;
