@@ -16,12 +16,19 @@ const subCategorySchema = new Schema<ISubCategory>(
     },
     name: {
       type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
     slug: {
       type: String,
+      required: true,
+      trim: true,
     },
     image: {
       type: String,
+      required: true,
+      trim: true,
     },
   },
   {

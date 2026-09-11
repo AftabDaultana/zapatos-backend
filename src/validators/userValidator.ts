@@ -9,7 +9,6 @@ export const updateUSerSchema = Joi.object({
     .messages({
       "string.pattern.base": "Please enter a valid phone number",
     }),
-  profilePicture: Joi.string().uri().trim(),
 });
 
 export const changePaswwordSchema = Joi.object({
