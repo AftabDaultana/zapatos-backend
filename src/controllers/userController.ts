@@ -1,7 +1,4 @@
 import type { Response, Request } from "express";
-import bcrypt from "bcrypt";
-import User from "../models/user.js";
-import AppError from "../utils/AppError.js";
 import {
   UpdateUserStatusService,
   getAllUsersService,

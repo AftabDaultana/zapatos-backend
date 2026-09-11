@@ -8,6 +8,7 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { seedAdmin } from "./utils/seedAdmin.js";
@@ -29,6 +30,7 @@ app.use(
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/categories", categoryRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
