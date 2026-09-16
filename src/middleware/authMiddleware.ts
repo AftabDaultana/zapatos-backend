@@ -27,23 +27,31 @@ export const verifyUser = async (
     throw new Error("JWT_SECRET is not defined");
   }
 
-  const decoded = jwt.verify(token, secret);
+  try {
+    const decoded = jwt.verify(token, secret);
 
-  if (typeof decoded === "string" || !decoded.userId) {
-    throw new AppError("Invalid authentication token", 401);
+    if (typeof decoded === "string" || !decoded.userId) {
+      throw new AppError("Invalid authentication token", 401);
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const blackListedToken = await BlacklistedToken.findOne({ tokenHash });
+
+    if (blackListedToken) {
+      throw new AppError("Please login to continue.", 403);
+    }
+
+    req.userId = decoded.userId;
+
+    next();
+  } catch (error: any) {
+    if (error.name === "TokenExpiredError") {
+      throw new AppError("JWT has expired.", 401);
+    }
+
+    throw error;
   }
-
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-
-  const blackListedToken = await BlacklistedToken.findOne({ tokenHash });
-
-  if (blackListedToken) {
-    throw new AppError("Please login to continue.", 403);
-  }
-
-  req.userId = decoded.userId;
-
-  next();
 };
 
 export const verifyAdmin = async (

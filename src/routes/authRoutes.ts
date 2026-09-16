@@ -17,6 +17,7 @@ import {
 } from "../controllers/authController.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { verifyPasswordResetToken } from "../middleware/authMiddleware.js";
+import { refresh } from "../controllers/refreshController.js";
 
 const router = Router();
 
@@ -40,5 +41,6 @@ router.post(
   verifyPasswordResetToken,
   asyncHandler(resetPassword),
 );
+router.post("/refresh", asyncHandler(refresh));
 
 export default router;

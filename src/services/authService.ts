@@ -8,6 +8,8 @@ import PasswordReset from "../models/passwordReset.js";
 import { generateOTP } from "../utils/generateOTP.js";
 import { sendEmail } from "./emailService.js";
 import BlacklistedToken from "../models/blacklistedToken.js";
+import { RefreshToken } from "../models/refreshToken.js";
+import { generateRefreshToken } from "../utils/generateRefreshToken.js";
 
 export const registerService = async (
   name: string,
@@ -63,7 +65,26 @@ export const loginService = async (
     throw new AppError("UNAUTHORIZED! Please enter the correct password.", 401);
   }
 
-  const token = generateToken(user._id.toString(), rememberMe ? "7d" : "1d");
+  const accessToken = generateToken(
+    user._id.toString(),
+    rememberMe ? "7d" : "15m",
+  );
+
+  let refreshToken: string | undefined;
+
+  if (!rememberMe) {
+    const { token, tokenHash } = generateRefreshToken();
+
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await RefreshToken.create({
+      userId: user._id,
+      tokenHash,
+      expiresAt,
+    });
+
+    refreshToken = token;
+  }
 
   const userData = user.toObject();
 
@@ -72,10 +93,13 @@ export const loginService = async (
   delete (userData as any).updatedAt;
   delete (userData as any).__v;
 
-  return { user: userData, token, rememberMe };
+  return { user: userData, accessToken, refreshToken, rememberMe };
 };
 
-export const logoutService = async (token: string) => {
+export const logoutService = async (
+  token: string,
+  refreshTokenValue?: string,
+) => {
   const secret = process.env.JWT_SECRET;
 
   if (!secret) {
@@ -96,6 +120,15 @@ export const logoutService = async (token: string) => {
     tokenHash,
     expiresAt,
   });
+
+  if (refreshTokenValue) {
+    const refreshTokenHash = crypto
+      .createHash("sha256")
+      .update(refreshTokenValue)
+      .digest("hex");
+
+    await RefreshToken.deleteOne({ tokenHash: refreshTokenHash });
+  }
 };
 
 export const forgotPasswordService = async (email: string) => {

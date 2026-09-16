@@ -29,9 +29,13 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   const { email, password, rememberMe } = req.body;
 
-  const { user, token } = await loginService(email, password, rememberMe);
+  const { user, accessToken, refreshToken } = await loginService(
+    email,
+    password,
+    rememberMe,
+  );
 
-  res.cookie("token", token, {
+  res.cookie("token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -39,6 +43,15 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     }),
   });
+
+  if (refreshToken) {
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/api/v1/auth/refresh",
+    });
+  }
 
   return res.status(200).json({
     success: true,
@@ -48,16 +61,23 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  const { token } = req.cookies;
+  const { token, refreshToken } = req.cookies;
 
   if (token) {
-    await logoutService(token);
+    await logoutService(token, refreshToken);
   }
 
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+  });
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/api/v1/auth/refresh",
   });
 
   return res.status(200).json({
