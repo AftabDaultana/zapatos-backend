@@ -10,4 +10,4 @@ export const updateSubCategorySchema = Joi.object({
   categoryName: Joi.string().trim(),
   name: Joi.string().trim(),
   slug: Joi.string().trim().lowercase(),
-});
+}).min(1);

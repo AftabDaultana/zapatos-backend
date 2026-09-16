@@ -23,6 +23,7 @@ const subCategorySchema = new Schema<ISubCategory>(
     slug: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
     },
     image: {
@@ -36,6 +37,6 @@ const subCategorySchema = new Schema<ISubCategory>(
   },
 );
 
-const SubCategory = mongoose.model("subCategory", subCategorySchema);
+const SubCategory = mongoose.model("SubCategory", subCategorySchema);
 
 export default SubCategory;
