@@ -4,8 +4,12 @@ import {
   deleteProductService,
   getAllProductsService,
   getProductByIdService,
+  getProductBySlugService,
+  getProductsByCategoryIdService,
+  getProductsBySubCategoryIdService,
   updateProductService,
 } from "../services/productService.js";
+import Product from "../models/product.js";
 
 export const createProduct = async (req: Request, res: Response) => {
   const {
@@ -69,6 +73,57 @@ export const getProductbyId = async (req: Request, res: Response) => {
   return res.status(200).json({
     success: true,
     message: "Product found successfully",
+    data: product,
+  });
+};
+
+export const getProductsByCategoryId = async (req: Request, res: Response) => {
+  const { categoryId } = req.params;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  const products = await getProductsByCategoryIdService(
+    categoryId as string,
+    page,
+    limit,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Products found successfully.",
+    data: products,
+  });
+};
+
+export const getProductsBySubCategoryId = async (
+  req: Request,
+  res: Response,
+) => {
+  const { subCategoryId } = req.params;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  const products = await getProductsBySubCategoryIdService(
+    subCategoryId as string,
+    page,
+    limit,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Products found",
+    data: products,
+  });
+};
+
+export const getProductBySlug = async (req: Request, res: Response) => {
+  const { slug } = req.params;
+
+  const product = await getProductBySlugService(slug as string);
+
+  return res.status(200).json({
+    success: true,
+    message: "Product found",
     data: product,
   });
 };

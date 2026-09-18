@@ -8,7 +8,12 @@ import {
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   createProduct,
+  deleteProduct,
   getAllProducts,
+  getProductbyId,
+  getProductBySlug,
+  getProductsByCategoryId,
+  getProductsBySubCategoryId,
   updateProduct,
 } from "../controllers/productController.js";
 import upload from "../middleware/uploadMiddleware.js";
@@ -34,7 +39,20 @@ router.put(
   validate(updateProductSchema),
   asyncHandler(updateProduct),
 );
+router.delete(
+  "/admin/:id",
+  verifyUser,
+  verifyAdmin,
+  asyncHandler(deleteProduct),
+);
 
 router.get("/", asyncHandler(getAllProducts));
+router.get("/slug/:slug", asyncHandler(getProductBySlug));
+router.get("/:id", asyncHandler(getProductbyId));
+router.get("/category/:categoryId", asyncHandler(getProductsByCategoryId));
+router.get(
+  "/subcategory/:subCategoryId",
+  asyncHandler(getProductsBySubCategoryId),
+);
 
 export default router;

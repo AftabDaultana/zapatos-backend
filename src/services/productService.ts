@@ -4,6 +4,11 @@ import AppError from "../utils/AppError.js";
 import SubCategory from "../models/subCategory.js";
 import { uploadImageToCloudinary } from "./cloudinaryService.js";
 import { getPagination } from "../utils/pagination.js";
+import Category from "../models/category.js";
+import {
+  getSubCategoriesByCategoryIdService,
+  getSubCategoryByIdService,
+} from "./subCategoryService.js";
 
 export const createProductService = async (
   name: string,
@@ -114,6 +119,80 @@ export const getProductByIdService = async (id: string) => {
 
   if (!product) {
     throw new AppError("No product found against the provided ID", 404);
+  }
+
+  return product;
+};
+
+export const getProductsByCategoryIdService = async (
+  categoryId: string,
+  page: number,
+  limit: number,
+) => {
+  const { skip } = getPagination({ page, limit });
+  const subcategories = await getSubCategoriesByCategoryIdService(categoryId);
+
+  if (subcategories.length === 0) {
+    return [];
+  }
+
+  const subCategoryIds = subcategories.map((subCategory) => subCategory._id);
+
+  const products = await Product.find({
+    subCategoryId: { $in: subCategoryIds },
+  })
+    .skip(skip)
+    .limit(limit)
+    .select("-createdAt -updatedAt -__v");
+
+  const totalProducts = await Product.countDocuments();
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  return {
+    products,
+    pagination: {
+      page,
+      limit,
+      totalProducts,
+      totalPages,
+    },
+  };
+};
+
+export const getProductsBySubCategoryIdService = async (
+  subCategoryId: string,
+  page: number,
+  limit: number,
+) => {
+  const { skip } = getPagination({ page, limit });
+  const products = await Product.find({
+    subCategoryId,
+  })
+    .skip(skip)
+    .limit(limit)
+    .select("-createdAt -updatedAt -__v");
+
+  const totalProducts = await Product.countDocuments();
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  return {
+    products,
+    pagination: {
+      page,
+      limit,
+      totalProducts,
+      totalPages,
+    },
+  };
+};
+
+export const getProductBySlugService = async (slug: string) => {
+  const product = await Product.findOne({ slug: slug.toLowerCase() }).select(
+    "-createdAt -updatedAt -__v",
+  );
+
+  if (!product) {
+    throw new AppError("No product found", 404);
   }
 
   return product;
