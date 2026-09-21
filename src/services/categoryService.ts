@@ -25,14 +25,21 @@ export const createCategoryService = async (name: string, slug: string) => {
 export const getAllPaginatedCategoriesService = async (
   page: number,
   limit: number,
+  search?: string,
 ) => {
   const { skip } = getPagination({ page, limit });
-  const categories = await Category.find()
+
+  const filter = search
+    ? {
+        name: new RegExp(search, "i"),
+      }
+    : {};
+  const categories = await Category.find(filter)
     .select("-createdAt -updatedAt -__v")
     .skip(skip)
     .limit(limit);
 
-  const totalCategories = await Category.countDocuments();
+  const totalCategories = await Category.countDocuments(filter);
 
   const totalPages = Math.ceil(totalCategories / limit);
 

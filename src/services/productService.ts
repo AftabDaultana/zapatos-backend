@@ -88,16 +88,29 @@ export const createProductService = async (
   return product;
 };
 
-export const getAllProductsService = async (page: number, limit: number) => {
+export const getAllProductsService = async (
+  page: number,
+  limit: number,
+  search?: string,
+) => {
   const { skip } = getPagination({ page, limit });
 
-  const products = await Product.find()
+  const filter: Record<string, any> = {};
+
+  if (search) {
+    filter.$or = [
+      { name: new RegExp(search, "i") },
+      { slug: new RegExp(search, "i") },
+    ];
+  }
+
+  const products = await Product.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .select("-createdAt -updatedAt -__v");
 
-  const totalProducts = await Product.countDocuments();
+  const totalProducts = await Product.countDocuments(filter);
 
   const totalPages = Math.ceil(totalProducts / limit);
 
@@ -128,8 +141,15 @@ export const getProductsByCategoryIdService = async (
   categoryId: string,
   page: number,
   limit: number,
+  minPrice?: number,
+  maxPrice?: number,
+  sizes: string[] = [],
+  colors: string[] = [],
+  type?: string,
+  rating?: number,
 ) => {
   const { skip } = getPagination({ page, limit });
+
   const subcategories = await getSubCategoriesByCategoryIdService(categoryId);
 
   if (subcategories.length === 0) {
@@ -138,14 +158,50 @@ export const getProductsByCategoryIdService = async (
 
   const subCategoryIds = subcategories.map((subCategory) => subCategory._id);
 
-  const products = await Product.find({
+  const filter: Record<string, any> = {
     subCategoryId: { $in: subCategoryIds },
-  })
+  };
+
+  if (maxPrice !== undefined || minPrice !== undefined) {
+    filter.discountedPrice = {};
+
+    if (maxPrice !== undefined) {
+      filter.discountedPrice.$lte = maxPrice;
+    }
+
+    if (minPrice !== undefined) {
+      filter.discountedPrice.$gte = minPrice;
+    }
+  }
+
+  if (sizes.length > 0) {
+    filter["specifications.sizeRange"] = {
+      $in: sizes,
+    };
+  }
+
+  if (colors.length > 0) {
+    filter["specifications.color"] = {
+      $in: colors,
+    };
+  }
+
+  if (type != undefined) {
+    filter["specifications.type"] = type;
+  }
+
+  if (rating != undefined) {
+    filter.rating = {
+      $gte: rating,
+    };
+  }
+
+  const products = await Product.find(filter)
     .skip(skip)
     .limit(limit)
     .select("-createdAt -updatedAt -__v");
 
-  const totalProducts = await Product.countDocuments();
+  const totalProducts = await Product.countDocuments(filter);
   const totalPages = Math.ceil(totalProducts / limit);
 
   return {
@@ -163,16 +219,57 @@ export const getProductsBySubCategoryIdService = async (
   subCategoryId: string,
   page: number,
   limit: number,
+  minPrice?: number,
+  maxPrice?: number,
+  sizes: string[] = [],
+  colors: string[] = [],
+  type?: string,
+  rating?: number,
 ) => {
   const { skip } = getPagination({ page, limit });
-  const products = await Product.find({
+  const filter: Record<string, any> = {
     subCategoryId,
-  })
+  };
+
+  if (maxPrice !== undefined || minPrice !== undefined) {
+    filter.discountedPrice = {};
+
+    if (maxPrice !== undefined) {
+      filter.discountedPrice.$lte = maxPrice;
+    }
+
+    if (minPrice !== undefined) {
+      filter.discountedPrice.$gte = minPrice;
+    }
+  }
+
+  if (sizes.length > 0) {
+    filter["specifications.sizeRange"] = {
+      $in: sizes,
+    };
+  }
+
+  if (colors.length > 0) {
+    filter["specifications.color"] = {
+      $in: colors,
+    };
+  }
+
+  if (type != undefined) {
+    filter["specifications.type"] = type;
+  }
+
+  if (rating != undefined) {
+    filter.rating = {
+      $gte: rating,
+    };
+  }
+  const products = await Product.find(filter)
     .skip(skip)
     .limit(limit)
     .select("-createdAt -updatedAt -__v");
 
-  const totalProducts = await Product.countDocuments();
+  const totalProducts = await Product.countDocuments(filter);
   const totalPages = Math.ceil(totalProducts / limit);
 
   return {

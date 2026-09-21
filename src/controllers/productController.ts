@@ -55,8 +55,9 @@ export const createProduct = async (req: Request, res: Response) => {
 export const getAllProducts = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
+  const search = String(req.query.search || "");
 
-  const result = await getAllProductsService(page, limit);
+  const result = await getAllProductsService(page, limit, search);
 
   return res.status(200).json({
     success: true,
@@ -81,11 +82,33 @@ export const getProductsByCategoryId = async (req: Request, res: Response) => {
   const { categoryId } = req.params;
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
+  const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+
+  const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+
+  const rating = req.query.rating ? Number(req.query.rating) : undefined;
+  const sizes = req.query.size
+    ? Array.isArray(req.query.size)
+      ? req.query.size.map(String)
+      : [String(req.query.size)]
+    : [];
+  const colors = req.query.color
+    ? Array.isArray(req.query.color)
+      ? req.query.color.map(String)
+      : [String(req.query.color)]
+    : [];
+  const type = req.query.type ? String(req.query.type) : undefined;
 
   const products = await getProductsByCategoryIdService(
     categoryId as string,
     page,
     limit,
+    minPrice,
+    maxPrice,
+    sizes,
+    colors,
+    type,
+    rating,
   );
 
   return res.status(200).json({
@@ -102,11 +125,33 @@ export const getProductsBySubCategoryId = async (
   const { subCategoryId } = req.params;
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
+  const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+
+  const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+
+  const rating = req.query.rating ? Number(req.query.rating) : undefined;
+  const sizes = req.query.size
+    ? Array.isArray(req.query.size)
+      ? req.query.size.map(String)
+      : [String(req.query.size)]
+    : [];
+  const colors = req.query.color
+    ? Array.isArray(req.query.color)
+      ? req.query.color.map(String)
+      : [String(req.query.color)]
+    : [];
+  const type = req.query.type ? String(req.query.type) : undefined;
 
   const products = await getProductsBySubCategoryIdService(
     subCategoryId as string,
     page,
     limit,
+    minPrice,
+    maxPrice,
+    sizes,
+    colors,
+    type,
+    rating,
   );
 
   return res.status(200).json({

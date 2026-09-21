@@ -47,8 +47,9 @@ export const createSubCategory = async (req: Request, res: Response) => {
 export const getAllSubCategories = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
+  const search = String(req.query.search || "");
 
-  const subCategories = await getAllSubCategoriesService(page, limit);
+  const subCategories = await getAllSubCategoriesService(page, limit, search);
 
   return res.status(200).json({
     success: true,

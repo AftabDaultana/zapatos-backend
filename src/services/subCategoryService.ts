@@ -38,15 +38,21 @@ export const createSubCategoryService = async (
 export const getAllSubCategoriesService = async (
   page: number,
   limit: number,
+  search?: string,
 ) => {
   const { skip } = getPagination({ page, limit });
+  const filter = search
+    ? {
+        name: new RegExp(search, "i"),
+      }
+    : {};
 
-  const subCategories = await SubCategory.find()
+  const subCategories = await SubCategory.find(filter)
     .skip(skip)
     .limit(limit)
     .select("-createdAt -updatedAt -__v");
 
-  const totalSubCategories = await SubCategory.countDocuments();
+  const totalSubCategories = await SubCategory.countDocuments(filter);
 
   const totalPages = Math.ceil(totalSubCategories / limit);
 
