@@ -17,9 +17,7 @@ export const createSubCategoryService = async (
     throw new AppError("Category does not exist", 404);
   }
 
-  const existingSubCategory = await SubCategory.findOne({
-    $or: [{ name }, { slug }],
-  });
+  const existingSubCategory = await SubCategory.findOne({ slug });
 
   if (existingSubCategory) {
     throw new AppError("Subcategory name or slug already exists.", 400);
@@ -35,24 +33,18 @@ export const createSubCategoryService = async (
   return createSubCategory;
 };
 
-export const getAllSubCategoriesService = async (
+export const getAllPaginatedSubCategoriesService = async (
   page: number,
   limit: number,
-  search?: string,
 ) => {
   const { skip } = getPagination({ page, limit });
-  const filter = search
-    ? {
-        name: new RegExp(search, "i"),
-      }
-    : {};
 
-  const subCategories = await SubCategory.find(filter)
+  const subCategories = await SubCategory.find()
     .skip(skip)
     .limit(limit)
     .select("-createdAt -updatedAt -__v");
 
-  const totalSubCategories = await SubCategory.countDocuments(filter);
+  const totalSubCategories = await SubCategory.countDocuments();
 
   const totalPages = Math.ceil(totalSubCategories / limit);
 

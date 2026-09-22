@@ -10,7 +10,7 @@ import { validate } from "../middleware/validate.js";
 import {
   createSubCategory,
   deleteSubCategory,
-  getAllSubCategories,
+  getAllPaginatedSubCategories,
   getSubCategoriesByCategoryId,
   getSubCategoryById,
   updateSubCategory,
@@ -30,7 +30,7 @@ router.get(
   "/admin",
   verifyUser,
   verifyAdmin,
-  asyncHandler(getAllSubCategories),
+  asyncHandler(getAllPaginatedSubCategories),
 );
 router.put(
   "/admin/:id",
