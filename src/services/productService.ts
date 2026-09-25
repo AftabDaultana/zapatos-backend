@@ -92,6 +92,16 @@ export const getAllProductsService = async (
   page: number,
   limit: number,
   search?: string,
+  isNewArrival?: boolean,
+  featured?: boolean,
+  isSustainable?: boolean,
+  isHighTop?: boolean,
+  stock?: string,
+  categoryId?: string,
+  subCategoryId?: string,
+  rating?: number,
+  minPrice?: number,
+  maxPrice?: number,
 ) => {
   const { skip } = getPagination({ page, limit });
 
@@ -102,6 +112,60 @@ export const getAllProductsService = async (
       { name: new RegExp(search, "i") },
       { slug: new RegExp(search, "i") },
     ];
+  }
+
+  if (isNewArrival !== undefined) {
+    filter.isNewArrival = isNewArrival;
+  }
+
+  if (featured !== undefined) {
+    filter.featured = featured;
+  }
+
+  if (isSustainable !== undefined) {
+    filter.isSustainable = isSustainable;
+  }
+
+  if (isHighTop !== undefined) {
+    filter.isHighTop = isHighTop;
+  }
+
+  if (stock === "in-stock") {
+    filter.quantity = { $gt: 0 };
+  }
+
+  if (stock === "out-of-stock") {
+    filter.quantity = 0;
+  }
+
+  if (categoryId) {
+    const subCategories = await SubCategory.find({
+      categoryId,
+    }).select("_id");
+
+    const subCategoryIds = subCategories.map((subCategory) => subCategory._id);
+
+    filter.subCategoryId = { $in: subCategoryIds };
+  }
+
+  if (subCategoryId) {
+    filter.subCategoryId = subCategoryId;
+  }
+
+  if (rating !== undefined) {
+    filter.rating = { $gte: rating };
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    filter.discountedPrice = {};
+
+    if (minPrice !== undefined) {
+      filter.discountedPrice.$gte = minPrice;
+    }
+
+    if (maxPrice !== undefined) {
+      filter.discountedPrice.$lte = maxPrice;
+    }
   }
 
   const products = await Product.find(filter)

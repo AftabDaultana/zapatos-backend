@@ -57,7 +57,63 @@ export const getAllProducts = async (req: Request, res: Response) => {
   const limit = Number(req.query.limit) || 10;
   const search = String(req.query.search || "");
 
-  const result = await getAllProductsService(page, limit, search);
+  const isNewArrival =
+    req.query.isNewArrival !== undefined
+      ? req.query.isNewArrival === "true"
+      : undefined;
+
+  const featured =
+    req.query.featured !== undefined
+      ? req.query.featured === "true"
+      : undefined;
+
+  const isSustainable =
+    req.query.isSustainable !== undefined
+      ? req.query.isSustainable === "true"
+      : undefined;
+
+  const isHighTop =
+    req.query.isHighTop !== undefined
+      ? req.query.isHighTop === "true"
+      : undefined;
+
+  const stock =
+    req.query.stock !== undefined ? String(req.query.stock) : undefined;
+
+  const categoryId =
+    req.query.categoryId !== undefined
+      ? String(req.query.categoryId)
+      : undefined;
+
+  const subCategoryId =
+    req.query.subCategoryId !== undefined
+      ? String(req.query.subCategoryId)
+      : undefined;
+
+  const rating =
+    req.query.rating !== undefined ? Number(req.query.rating) : undefined;
+
+  const minPrice =
+    req.query.minPrice !== undefined ? Number(req.query.minPrice) : undefined;
+
+  const maxPrice =
+    req.query.maxPrice !== undefined ? Number(req.query.maxPrice) : undefined;
+
+  const result = await getAllProductsService(
+    page,
+    limit,
+    search,
+    isNewArrival,
+    featured,
+    isSustainable,
+    isHighTop,
+    stock,
+    categoryId,
+    subCategoryId,
+    rating,
+    minPrice,
+    maxPrice,
+  );
 
   return res.status(200).json({
     success: true,
