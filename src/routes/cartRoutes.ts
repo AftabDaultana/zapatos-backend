@@ -9,6 +9,7 @@ import {
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   addToCart,
+  clearCart,
   deleteCartItem,
   getAllCarts,
   getCartById,
@@ -37,6 +38,8 @@ router.delete(
   validate(deleteCartItemSchema),
   asyncHandler(deleteCartItem),
 );
+router.delete("/clear", verifyUser, asyncHandler(clearCart));
+
 router.get("/admin/:id", verifyUser, verifyAdmin, asyncHandler(getCartById));
 router.get("/admin", verifyUser, verifyAdmin, asyncHandler(getAllCarts));
 

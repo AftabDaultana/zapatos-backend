@@ -44,7 +44,7 @@ export const addToCartService = async (
         },
       ],
     });
-    return cart;
+    return await cart.populate("items.productId");
   }
 
   const existingItem = existingCart.items.find(
@@ -73,13 +73,13 @@ export const addToCartService = async (
 
   await existingCart.save();
 
-  return existingCart;
+  return await existingCart.populate("items.productId");
 };
 
 export const getUserCartService = async (userId: string) => {
-  const cart = await Cart.findOne({ userId }).select(
-    "-createdAt -updatedAt -__v",
-  );
+  const cart = await Cart.findOne({ userId })
+    .select("-createdAt -updatedAt -__v")
+    .populate("items.productId");
 
   if (!cart) {
     return {
@@ -92,7 +92,9 @@ export const getUserCartService = async (userId: string) => {
 };
 
 export const getCartByIdService = async (id: string) => {
-  const cart = await Cart.findById(id).select("-createdAt -updatedAt -__v");
+  const cart = await Cart.findById(id)
+    .select("-createdAt -updatedAt -__v")
+    .populate("items.productId");
 
   if (!cart) {
     throw new AppError("Cart not found", 404);
@@ -106,6 +108,8 @@ export const getAllCartsService = async (page: number, limit: number) => {
 
   const carts = await Cart.find()
     .select("-createdAt -updatedAt -__v")
+    .populate("userId", "name phoneNumber")
+    .populate("items.productId")
     .skip(skip)
     .limit(limit);
 
@@ -127,8 +131,6 @@ export const updateCartService = async (
   userId: string,
   productId: string,
   quantity?: number,
-  color?: string,
-  size?: string,
 ) => {
   const cart = await Cart.findOne({ userId });
 
@@ -154,29 +156,13 @@ export const updateCartService = async (
     throw new AppError("Requested quantity is not available", 400);
   }
 
-  if (size !== undefined && !product.specifications.sizeRange.includes(size)) {
-    throw new AppError("Requested size does not exist", 400);
-  }
-
-  if (color !== undefined && !product.specifications.color.includes(color)) {
-    throw new AppError("Requested color is not available", 400);
-  }
-
   if (quantity !== undefined) {
     cartItem.quantity = quantity;
   }
 
-  if (size !== undefined) {
-    cartItem.size = size;
-  }
-
-  if (color !== undefined) {
-    cartItem.color = color;
-  }
-
   await cart.save();
 
-  return cart;
+  return await cart.populate("items.productId");
 };
 
 export const deleteCartItemService = async (
@@ -198,6 +184,20 @@ export const deleteCartItemService = async (
   }
 
   cart.items.splice(itemIndex, 1);
+
+  await cart.save();
+
+  return await cart.populate("items.productId");
+};
+
+export const clearCartService = async (userId: string) => {
+  const cart = await Cart.findOne({ userId });
+
+  if (!cart) {
+    throw new AppError("Cart not found", 404);
+  }
+
+  cart.items = [];
 
   await cart.save();
 

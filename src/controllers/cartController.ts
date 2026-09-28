@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import {
   addToCartService,
+  clearCartService,
   deleteCartItemService,
   getAllCartsService,
   getCartByIdService,
@@ -66,14 +67,12 @@ export const getAllCarts = async (req: Request, res: Response) => {
 
 export const updateCart = async (req: Request, res: Response) => {
   const userId = req.userId;
-  const { productId, quantity, color, size } = req.body;
+  const { productId, quantity } = req.body;
 
   const updatedCart = await updateCartService(
     userId as string,
     productId as string,
     quantity,
-    color,
-    size,
   );
 
   return res.status(200).json({
@@ -93,5 +92,15 @@ export const deleteCartItem = async (req: Request, res: Response) => {
     success: true,
     message: "Cart item deleted successfully",
     data: cart,
+  });
+};
+
+export const clearCart = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  await clearCartService(userId as string);
+
+  return res.status(200).json({
+    success: true,
+    message: "Cart cleared successfully",
   });
 };
