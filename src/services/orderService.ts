@@ -5,6 +5,7 @@ import Product from "../models/product.js";
 import Cart from "../models/cart.js";
 import User, { type IAddress } from "../models/user.js";
 import { sendEmail } from "./emailService.js";
+import { getPagination } from "../utils/pagination.js";
 
 interface CreateOrderData {
   userId: mongoose.Types.ObjectId | null;
@@ -290,4 +291,90 @@ export const createOrderService = async (data: CreateOrderData) => {
   } finally {
     await session.endSession();
   }
+};
+
+export const getOrderByIdService = async (
+  id: string,
+  userId: mongoose.Types.ObjectId,
+) => {
+  const order = await Order.findById(id).select("-createdAt -updatedAt -__v");
+
+  if (!order) {
+    throw new AppError("Order dows not exist", 404);
+  }
+
+  return order;
+};
+
+export const getCurentUserOrdersService = async (
+  userId: mongoose.Types.ObjectId,
+  page: number,
+  limit: number,
+) => {
+  const { skip } = getPagination({ page, limit });
+  const orders = await Order.find({ userId })
+    .skip(skip)
+    .limit(limit)
+    .select("-createdAt -updatedAt -__v");
+
+  const totalOrders = await Order.countDocuments({ userId });
+  const totalPages = Math.ceil(totalOrders / limit);
+
+  return {
+    orders,
+    pagination: {
+      page,
+      limit,
+      totalOrders,
+      totalPages,
+    },
+  };
+};
+
+export const getAllOrdersService = async (
+  page: number,
+  limit: number,
+  search?: string,
+  status?: string,
+) => {
+  const { skip } = getPagination({ page, limit });
+  const filter: Record<string, any> = {};
+
+  if (search) {
+    const searchConditions: Record<string, any>[] = [
+      {
+        "customer.name": {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
+
+    if (mongoose.isValidObjectId(search)) {
+      searchConditions.push({
+        _id: search,
+      });
+    }
+
+    filter.$or = searchConditions;
+  }
+
+  if (status) {
+    filter.status = status;
+  }
+
+  const orders = await Order.find().skip(skip).limit(limit);
+
+  const totalOrders = await Order.countDocuments(filter);
+  const totalPages = Math.ceil(totalOrders / limit);
+
+  return {
+    orders,
+    pagination: {
+      page,
+      limit,
+      totalOrders,
+      totalPages,
+    },
+  };
 };
