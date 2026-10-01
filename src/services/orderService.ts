@@ -363,7 +363,7 @@ export const getAllOrdersService = async (
     filter.status = status;
   }
 
-  const orders = await Order.find().skip(skip).limit(limit);
+  const orders = await Order.find(filter).skip(skip).limit(limit);
 
   const totalOrders = await Order.countDocuments(filter);
   const totalPages = Math.ceil(totalOrders / limit);
