@@ -27,3 +27,16 @@ export const createOrderSchema = Joi.object({
   shippingAddress: addressSchema,
   items: Joi.array().items(orderItemSchema).min(1).required(),
 });
+
+export const updateOrderStatusSchema = Joi.object({
+  status: Joi.string()
+    .valid(
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    )
+    .required(),
+});

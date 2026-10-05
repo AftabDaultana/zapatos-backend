@@ -5,7 +5,10 @@ import {
   getAllOrdersService,
   getCurentUserOrdersService,
   getOrderByIdService,
+  updateOrderStatusService,
+  type OrderStatus,
 } from "../services/orderService.js";
+import { string } from "joi";
 
 export const createOrder = async (req: Request, res: Response) => {
   const userId = req.userId ? new mongoose.Types.ObjectId(req.userId) : null;
@@ -69,5 +72,21 @@ export const getAllOrders = async (req: Request, res: Response) => {
     success: true,
     message: "Orders found.",
     data: orders,
+  });
+};
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const updatedOrder = await updateOrderStatusService(
+    status as OrderStatus,
+    id as string,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "order status updated successfully.",
+    data: updatedOrder,
   });
 };

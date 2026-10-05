@@ -40,6 +40,14 @@ interface CreateOrderData {
   }[];
 }
 
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
 export const createOrderService = async (data: CreateOrderData) => {
   let customer = data.customer;
   let billingAddress: IAddress | undefined;
@@ -377,4 +385,21 @@ export const getAllOrdersService = async (
       totalPages,
     },
   };
+};
+
+export const updateOrderStatusService = async (
+  status: OrderStatus,
+  id: string,
+) => {
+  const order = await Order.findById(id).select("-createdAt -__v");
+
+  if (!order) {
+    throw new AppError("Order not found.", 404);
+  }
+
+  order.status = status;
+
+  const updatedOrder = await order.save();
+
+  return updatedOrder;
 };
