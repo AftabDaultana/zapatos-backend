@@ -403,3 +403,26 @@ export const updateOrderStatusService = async (
 
   return updatedOrder;
 };
+
+export const cancelOrderService = async (
+  id: string,
+  userId: mongoose.Types.ObjectId,
+) => {
+  const order = await Order.findOne({ _id: id, userId: userId }).select(
+    "-createdAt -__v",
+  );
+
+  if (!order) {
+    throw new AppError("Order not found", 404);
+  }
+
+  if (order.status !== "pending") {
+    throw new AppError("Your order cannot be cancelled at this stage", 400);
+  }
+
+  order.status = "cancelled";
+
+  const cancelledOrder = await order.save();
+
+  return cancelledOrder;
+};

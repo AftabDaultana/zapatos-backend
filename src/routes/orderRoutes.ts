@@ -11,6 +11,7 @@ import {
 } from "../validators/orderValidator.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
+  cancelOrder,
   createOrder,
   getAllOrders,
   getCurrentUserOrders,
@@ -35,6 +36,7 @@ router.put(
   validate(updateOrderStatusSchema),
   asyncHandler(updateOrderStatus),
 );
+router.patch("/:id", verifyUser, asyncHandler(cancelOrder));
 router.get("/:id", verifyUser, asyncHandler(getOrderById));
 
 export default router;

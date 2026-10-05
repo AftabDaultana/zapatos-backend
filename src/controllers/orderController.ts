@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import {
+  cancelOrderService,
   createOrderService,
   getAllOrdersService,
   getCurentUserOrdersService,
@@ -88,5 +89,21 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     success: true,
     message: "order status updated successfully.",
     data: updatedOrder,
+  });
+};
+
+export const cancelOrder = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  const { id } = req.params;
+
+  const cancelledOrder = await cancelOrderService(
+    id as string,
+    new mongoose.Types.ObjectId(userId),
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Order cancelled succesfully.",
+    data: cancelledOrder,
   });
 };
