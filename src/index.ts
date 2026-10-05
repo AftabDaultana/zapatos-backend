@@ -14,6 +14,7 @@ import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { seedAdmin } from "./utils/seedAdmin.js";
@@ -40,6 +41,7 @@ app.use("/api/v1/subcategories", subCategoryRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/admin/analytics", analyticsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
