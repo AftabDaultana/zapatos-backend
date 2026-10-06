@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { verifyAdmin, verifyUser } from "../middleware/authMiddleware.js";
 import {
+  annualRevenue,
   bestSelingCategories,
+  monthlyRevenue,
   orders,
   sales,
   weeklyOrders,
@@ -23,6 +25,18 @@ router.get(
   verifyUser,
   verifyAdmin,
   asyncHandler(bestSelingCategories),
+);
+router.get(
+  "/annual-revenue",
+  verifyUser,
+  verifyAdmin,
+  asyncHandler(annualRevenue),
+);
+router.get(
+  "/monthly-revenue",
+  verifyUser,
+  verifyAdmin,
+  asyncHandler(monthlyRevenue),
 );
 
 export default router;

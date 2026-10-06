@@ -322,3 +322,56 @@ export const bestSellingCategoriesService = async () => {
 
   return result[0]?.categories ?? [];
 };
+
+export const annualRevenueService = async () => {
+  const result = await Order.aggregate([
+    {
+      $match: {
+        status: {
+          $in: revenueStatuses,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $year: {
+            date: "$createdAt",
+            timezone: "Asia/Karachi",
+          },
+        },
+        revenue: {
+          $sum: "$total",
+        },
+      },
+    },
+    {
+      $sort: {
+        _id: 1,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        year: "$_id",
+        revenue: 1,
+      },
+    },
+  ]);
+
+  return result;
+};
+
+export const monthlyRevenueService = async () => {
+  const result = await Order.aggregate([
+    {
+      $match: {
+        status: {
+          $in: revenueStatuses,
+        },
+      },
+    },
+  ]);
+
+  return result;
+};

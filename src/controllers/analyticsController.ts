@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import {
+  annualRevenueService,
   bestSellingCategoriesService,
+  monthlyRevenueService,
   orderSummaryService,
   salesService,
   weeklyOrdersService,
@@ -42,6 +44,25 @@ export const bestSelingCategories = async (req: Request, res: Response) => {
   return res.status(200).json({
     success: true,
     message: "Best selling categories percentage calculated successfully",
+    data: result,
+  });
+};
+
+export const annualRevenue = async (req: Request, res: Response) => {
+  const result = await annualRevenueService();
+  return res.status(200).json({
+    success: true,
+    message: "Annual revenue data fetched successfullty.",
+    data: result,
+  });
+};
+
+export const monthlyRevenue = async (req: Request, res: Response) => {
+  const result = await monthlyRevenueService();
+
+  return res.status(200).json({
+    success: true,
+    message: "Monthly revenue data fetched successfully",
     data: result,
   });
 };
