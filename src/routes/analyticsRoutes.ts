@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyAdmin, verifyUser } from "../middleware/authMiddleware.js";
 import {
+  bestSelingCategories,
   orders,
   sales,
   weeklyOrders,
@@ -16,6 +17,12 @@ router.get(
   verifyUser,
   verifyAdmin,
   asyncHandler(weeklyOrders),
+);
+router.get(
+  "/best-selling-categories",
+  verifyUser,
+  verifyAdmin,
+  asyncHandler(bestSelingCategories),
 );
 
 export default router;

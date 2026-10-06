@@ -1,3 +1,4 @@
+import { getProductsByCategoryId } from "../controllers/productController.js";
 import Order from "../models/order.js";
 import { getLocalDateBoundaries } from "../utils/date.js";
 
@@ -213,4 +214,111 @@ export const weeklyOrdersService = async () => {
   });
 
   return weeklyOrders;
+};
+
+export const bestSellingCategoriesService = async () => {
+  const result = await Order.aggregate([
+    {
+      $match: {
+        status: {
+          $in: revenueStatuses,
+        },
+      },
+    },
+    {
+      $unwind: "$items",
+    },
+    {
+      $project: {
+        _id: 1,
+        status: 1,
+        productId: "$items.productId",
+        quantity: "$items.quantity",
+      },
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "productId",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+    {
+      $unwind: "$product",
+    },
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "product.subCategoryId",
+        foreignField: "_id",
+        as: "subcategory",
+      },
+    },
+    {
+      $unwind: "$subcategory",
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "subcategory.categoryId",
+        foreignField: "_id",
+        as: "category",
+      },
+    },
+    {
+      $unwind: "$category",
+    },
+    {
+      $group: {
+        _id: "$category._id",
+        name: { $first: "$category.name" },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: {
+        count: -1,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        categories: {
+          $push: "$$ROOT",
+        },
+        total: {
+          $sum: "$count",
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        categories: {
+          $map: {
+            input: "$categories",
+            as: "category",
+            in: {
+              name: "$$category.name",
+              count: "$$category.count",
+              percentage: {
+                $round: [
+                  {
+                    $multiply: [
+                      { $divide: ["$$category.count", "$total"] },
+                      100,
+                    ],
+                  },
+                  2,
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  ]);
+
+  return result[0]?.categories ?? [];
 };
