@@ -58,7 +58,8 @@ export const annualRevenue = async (req: Request, res: Response) => {
 };
 
 export const monthlyRevenue = async (req: Request, res: Response) => {
-  const result = await monthlyRevenueService();
+  const year = Number(req.query.year) || new Date().getFullYear();
+  const result = await monthlyRevenueService(year);
 
   return res.status(200).json({
     success: true,

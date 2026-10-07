@@ -1,4 +1,3 @@
-import { getProductsByCategoryId } from "../controllers/productController.js";
 import Order from "../models/order.js";
 import { getLocalDateBoundaries } from "../utils/date.js";
 
@@ -362,16 +361,69 @@ export const annualRevenueService = async () => {
   return result;
 };
 
-export const monthlyRevenueService = async () => {
+export const monthlyRevenueService = async (year: number) => {
   const result = await Order.aggregate([
     {
       $match: {
         status: {
           $in: revenueStatuses,
         },
+        createdAt: {
+          $gte: new Date(`${year}-01-01T00:00:00+05:00`),
+          $lt: new Date(`${year + 1}-01-01T00:00:00+05:00`),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $month: {
+            date: "$createdAt",
+            timezone: "Asia/Karachi",
+          },
+        },
+        revenue: {
+          $sum: "$total",
+        },
+      },
+    },
+    {
+      $sort: {
+        _id: 1,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: "$_id",
+        revenue: 1,
       },
     },
   ]);
 
-  return result;
+  const monthlyRevenue = Array.from({ length: 12 }, (_, index) => {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const month = index + 1;
+    const data = result.find((item) => item.month === month);
+
+    return {
+      month: monthNames[index],
+      revenue: data?.revenue ?? 0,
+    };
+  });
+
+  return monthlyRevenue;
 };
