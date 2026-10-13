@@ -305,7 +305,7 @@ export const getOrderByIdService = async (
   id: string,
   userId: mongoose.Types.ObjectId,
 ) => {
-  const order = await Order.findById(id).select("-createdAt -updatedAt -__v");
+  const order = await Order.findById(id).select("-__v");
 
   if (!order) {
     throw new AppError("Order dows not exist", 404);
@@ -356,6 +356,18 @@ export const getAllOrdersService = async (
           $options: "i",
         },
       },
+      {
+        "customer.email": {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        "customer.phoneNumber": {
+          $regex: search,
+          $options: "i",
+        },
+      },
     ];
 
     if (mongoose.isValidObjectId(search)) {
@@ -371,7 +383,10 @@ export const getAllOrdersService = async (
     filter.status = status;
   }
 
-  const orders = await Order.find(filter).skip(skip).limit(limit);
+  const orders = await Order.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   const totalOrders = await Order.countDocuments(filter);
   const totalPages = Math.ceil(totalOrders / limit);
@@ -391,7 +406,7 @@ export const updateOrderStatusService = async (
   status: OrderStatus,
   id: string,
 ) => {
-  const order = await Order.findById(id).select("-createdAt -__v");
+  const order = await Order.findById(id).select("-__v");
 
   if (!order) {
     throw new AppError("Order not found.", 404);
@@ -408,9 +423,7 @@ export const cancelOrderService = async (
   id: string,
   userId: mongoose.Types.ObjectId,
 ) => {
-  const order = await Order.findOne({ _id: id, userId: userId }).select(
-    "-createdAt -__v",
-  );
+  const order = await Order.findOne({ _id: id, userId: userId }).select("-__v");
 
   if (!order) {
     throw new AppError("Order not found", 404);
