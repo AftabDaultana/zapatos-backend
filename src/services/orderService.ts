@@ -323,7 +323,7 @@ export const getCurentUserOrdersService = async (
   const orders = await Order.find({ userId })
     .skip(skip)
     .limit(limit)
-    .select("-createdAt -updatedAt -__v");
+    .select("-__v");
 
   const totalOrders = await Order.countDocuments({ userId });
   const totalPages = Math.ceil(totalOrders / limit);
