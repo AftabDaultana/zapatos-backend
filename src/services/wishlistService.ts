@@ -69,7 +69,7 @@ export const getWishlistService = async (userId: string) => {
   const wishlist = await Wishlist.findOne({ userId }).populate({
     path: "items.productId",
     select:
-      "name slug price discountedPrice images rating ratingCount quantity",
+      "name slug price discountedPrice images rating ratingCount quantity specifications",
   });
 
   if (!wishlist) {
