@@ -28,3 +28,19 @@ export const createBlogService = async (data: CreateBlogData) => {
 
   return blog;
 };
+
+export const getAllBlogsService = async (page: number, limit: number) => {
+  const blogs = await Blog.find()
+    .sort({ createdAt: -1, _id: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  const total = await Blog.countDocuments();
+
+  return {
+    blogs,
+    total,
+    page,
+    hasMore: page * limit < total,
+  };
+};
