@@ -3,6 +3,7 @@ import {
   createBlogService,
   getAllBlogsService,
   getBlogBySlugService,
+  updateBlogService,
 } from "../services/blogService.js";
 import AppError from "../utils/AppError.js";
 import { uploadImageToCloudinary } from "../services/cloudinaryService.js";
@@ -61,6 +62,34 @@ export const getBlogBySlug = async (req: Request, res: Response) => {
   return res.status(200).json({
     success: true,
     message: "Blog retrieved successfully",
+    data: blog,
+  });
+};
+
+export const updateBlog = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { title, slug, content } = req.body;
+  let image: string | undefined;
+
+  if (req.file) {
+    const uploadedImage = await uploadImageToCloudinary(
+      req.file.buffer,
+      "zapatos/blogs",
+    );
+
+    image = uploadedImage.secure_url;
+  }
+
+  const blog = await updateBlogService(id as string, {
+    title,
+    slug,
+    content,
+    ...(image && { image }),
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Blog updated successfully",
     data: blog,
   });
 };

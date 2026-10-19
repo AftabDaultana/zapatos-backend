@@ -9,6 +9,13 @@ interface CreateBlogData {
   author: string;
 }
 
+interface UpdateBlogData {
+  title?: string;
+  slug?: string;
+  image?: string;
+  content?: string;
+}
+
 export const createBlogService = async (data: CreateBlogData) => {
   const existingBlog = await Blog.findOne({
     $or: [{ title: data.title }, { slug: data.slug }],
@@ -53,4 +60,34 @@ export const getBlogBySlugService = async (slug: string) => {
   }
 
   return blog;
+};
+
+export const updateBlogService = async (id: string, data: UpdateBlogData) => {
+  const blogExist = await Blog.findById(id);
+
+  if (!blogExist) {
+    throw new AppError("Blog does not exist.", 404);
+  }
+
+  if (data.title || data.slug) {
+    const duplicateBlog = await Blog.findOne({
+      _id: { $ne: id },
+      $or: [
+        ...(data.title ? [{ title: data.title }] : []),
+        ...(data.slug ? [{ slug: data.slug }] : []),
+      ],
+    });
+
+    if (duplicateBlog) {
+      throw new AppError(
+        "A blog with provided title or slug already exist",
+        400,
+      );
+    }
+  }
+
+  Object.assign(blogExist, data);
+  await blogExist.save();
+
+  return blogExist;
 };
