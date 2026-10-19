@@ -1,6 +1,7 @@
 import type { Response, Request } from "express";
 import {
   createBlogService,
+  deleteBlogService,
   getAllBlogsService,
   getBlogBySlugService,
   updateBlogService,
@@ -91,5 +92,16 @@ export const updateBlog = async (req: Request, res: Response) => {
     success: true,
     message: "Blog updated successfully",
     data: blog,
+  });
+};
+
+export const deleteBlog = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  await deleteBlogService(id as string);
+
+  return res.status(200).json({
+    success: true,
+    message: "Blog deleted successfully.",
   });
 };

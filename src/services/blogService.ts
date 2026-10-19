@@ -91,3 +91,13 @@ export const updateBlogService = async (id: string, data: UpdateBlogData) => {
 
   return blogExist;
 };
+
+export const deleteBlogService = async (id: string) => {
+  const blogToDelete = await Blog.findByIdAndDelete(id);
+
+  if (!blogToDelete) {
+    throw new AppError("Blog does not exist.", 404);
+  }
+
+  return blogToDelete;
+};

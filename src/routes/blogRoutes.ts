@@ -4,6 +4,7 @@ import upload from "../middleware/uploadMiddleware.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   createBlog,
+  deleteBlog,
   getAllBlogs,
   getBlogBySlug,
   updateBlog,
@@ -34,5 +35,6 @@ router.put(
   validate(updateBlogSchema),
   asyncHandler(updateBlog),
 );
+router.delete("/admin/:id", verifyUser, verifyAdmin, asyncHandler(deleteBlog));
 
 export default router;
