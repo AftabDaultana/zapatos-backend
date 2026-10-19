@@ -2,6 +2,7 @@ import type { Response, Request } from "express";
 import {
   createBlogService,
   getAllBlogsService,
+  getBlogBySlugService,
 } from "../services/blogService.js";
 import AppError from "../utils/AppError.js";
 import { uploadImageToCloudinary } from "../services/cloudinaryService.js";
@@ -50,5 +51,16 @@ export const getAllBlogs = async (req: Request, res: Response) => {
       total: result.total,
       hasMore: result.hasMore,
     },
+  });
+};
+
+export const getBlogBySlug = async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const blog = await getBlogBySlugService(slug as string);
+
+  return res.status(200).json({
+    success: true,
+    message: "Blog retrieved successfully",
+    data: blog,
   });
 };

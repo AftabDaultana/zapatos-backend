@@ -2,7 +2,11 @@ import { Router } from "express";
 import { verifyAdmin, verifyUser } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { createBlog, getAllBlogs } from "../controllers/blogController.js";
+import {
+  createBlog,
+  getAllBlogs,
+  getBlogBySlug,
+} from "../controllers/blogController.js";
 
 const router = Router();
 
@@ -14,5 +18,6 @@ router.post(
   asyncHandler(createBlog),
 );
 router.get("/", asyncHandler(getAllBlogs));
+router.get("/:slug", asyncHandler(getBlogBySlug));
 
 export default router;

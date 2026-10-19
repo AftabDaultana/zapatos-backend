@@ -44,3 +44,13 @@ export const getAllBlogsService = async (page: number, limit: number) => {
     hasMore: page * limit < total,
   };
 };
+
+export const getBlogBySlugService = async (slug: string) => {
+  const blog = await Blog.findOne({ slug });
+
+  if (!blog) {
+    throw new AppError("Blog with the provided slug does not exist", 404);
+  }
+
+  return blog;
+};
