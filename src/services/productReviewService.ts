@@ -1,6 +1,7 @@
 import AppError from "../utils/AppError.js";
 import ProductReview from "../models/productReview.js";
 import Product from "../models/product.js";
+import { getPagination } from "../utils/pagination.js";
 
 export const createProductReviewService = async (
   heading: string,
@@ -37,4 +38,39 @@ export const createProductReviewService = async (
   });
 
   return createdProductReview;
+};
+
+export const getUserProductReviewsService = async (
+  page: number,
+  limit: number,
+  customerId: string,
+  status?: "unapproved" | "approved" | "rejected",
+) => {
+  const { skip } = getPagination({ page, limit });
+  const filter: Record<string, unknown> = {
+    customerId,
+  };
+
+  if (status) {
+    filter.status = status;
+  }
+  const customerProductReviews = await ProductReview.find(filter)
+    .populate("productId", "name slug")
+    .populate("customerId", "name")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const totalProductReviews = await ProductReview.countDocuments(filter);
+  const totalPages = Math.ceil(totalProductReviews / limit);
+
+  return {
+    customerProductReviews,
+    pagination: {
+      page,
+      limit,
+      totalProductReviews,
+      totalPages,
+    },
+  };
 };
