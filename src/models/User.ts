@@ -18,8 +18,6 @@ export interface IUser extends Document {
   status: "active" | "inactive";
   billingAddress: IAddress;
   shippingAddress: IAddress;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const addressSchema = new Schema<IAddress>({
