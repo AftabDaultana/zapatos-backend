@@ -17,6 +17,7 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import subCategoryRoutes from "./routes/subCategoryRoutes.js";
+import productReviewRoutes from "./routes/productReviewRoutes.js";
 
 import { seedAdmin } from "./utils/seedAdmin.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
@@ -46,6 +47,7 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/subcategories", subCategoryRoutes);
 app.use("/api/v1/admin/analytics", analyticsRoutes);
+app.use("/api/v1/product-reviews", productReviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
