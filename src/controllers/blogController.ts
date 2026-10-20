@@ -39,7 +39,7 @@ export const createBlog = async (req: Request, res: Response) => {
 
 export const getAllBlogs = async (req: Request, res: Response) => {
   const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(6, Math.max(1, Number(req.query.limit) || 6));
+  const limit = Math.min(10, Math.max(1, Number(req.query.limit) || 10));
 
   const result = await getAllBlogsService(page, limit);
 

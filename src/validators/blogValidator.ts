@@ -18,12 +18,6 @@ export const createBlogSchema = Joi.object({
       "any.required": "Blog slug is required.",
     }),
 
-  image: Joi.string().trim().uri().required().messages({
-    "string.empty": "Blog image URL is required.",
-    "string.uri": "Please provide a valid blog image URL.",
-    "any.required": "Blog image URL is required.",
-  }),
-
   content: Joi.string().trim().required().messages({
     "string.empty": "Blog content is required.",
     "any.required": "Blog content is required.",
