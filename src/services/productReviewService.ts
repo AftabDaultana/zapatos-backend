@@ -40,7 +40,7 @@ export const createProductReviewService = async (
   return createdProductReview;
 };
 
-export const getUserProductReviewsService = async (
+export const getCurrentUserProductReviewsService = async (
   page: number,
   limit: number,
   customerId: string,
@@ -94,6 +94,42 @@ export const getAllProductReviewsService = async (
     .limit(limit);
 
   const totalProductReviews = await ProductReview.countDocuments(filter);
+  const totalPages = Math.ceil(totalProductReviews / limit);
+
+  return {
+    productReviews,
+    pagination: {
+      page,
+      limit,
+      totalProductReviews,
+      totalPages,
+    },
+  };
+};
+
+export const getProductReviewsService = async (
+  page: number,
+  limit: number,
+  productId: string,
+) => {
+  const { skip } = getPagination({ page, limit });
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new AppError("Product not found", 404);
+  }
+
+  const productReviews = await ProductReview.find({
+    productId,
+    status: "approved",
+  })
+    .populate("productId", "name slug")
+    .populate("customerId", "name")
+    .skip(skip)
+    .limit(limit);
+
+  const totalProductReviews = await ProductReview.countDocuments();
   const totalPages = Math.ceil(totalProductReviews / limit);
 
   return {

@@ -2,7 +2,8 @@ import type { Request, Response } from "express";
 import {
   createProductReviewService,
   getAllProductReviewsService,
-  getUserProductReviewsService,
+  getCurrentUserProductReviewsService,
+  getProductReviewsService,
 } from "../services/productReviewService.js";
 import AppError from "../utils/AppError.js";
 
@@ -26,7 +27,10 @@ export const createProductReview = async (req: Request, res: Response) => {
   });
 };
 
-export const getUserProductReviews = async (req: Request, res: Response) => {
+export const getCurrentUserProductReviews = async (
+  req: Request,
+  res: Response,
+) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
 
@@ -50,7 +54,7 @@ export const getUserProductReviews = async (req: Request, res: Response) => {
 
   const status = queryStatus as (typeof allowedStatuses)[number] | undefined;
 
-  const customerProductReviews = await getUserProductReviewsService(
+  const customerProductReviews = await getCurrentUserProductReviewsService(
     page,
     limit,
     customerId as string,
@@ -91,6 +95,24 @@ export const getAllProductReviews = async (req: Request, res: Response) => {
   return res.status(200).json({
     success: true,
     message: "Product reviews fetched successfully",
+    data: productReviews,
+  });
+};
+
+export const getProductReviews = async (req: Request, res: Response) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const { productId } = req.params;
+
+  const productReviews = await getProductReviewsService(
+    page,
+    limit,
+    productId as string,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: `Product reviews for product ID: ${productId} fetched successfully`,
     data: productReviews,
   });
 };
