@@ -129,7 +129,10 @@ export const getProductReviewsService = async (
     .skip(skip)
     .limit(limit);
 
-  const totalProductReviews = await ProductReview.countDocuments();
+  const totalProductReviews = await ProductReview.countDocuments({
+    productId,
+    status: "approved",
+  });
   const totalPages = Math.ceil(totalProductReviews / limit);
 
   return {
