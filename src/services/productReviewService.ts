@@ -74,3 +74,35 @@ export const getUserProductReviewsService = async (
     },
   };
 };
+
+export const getAllProductReviewsService = async (
+  page: number,
+  limit: number,
+  status?: "unapproved" | "approved" | "rejected",
+) => {
+  const { skip } = getPagination({ page, limit });
+  const filter: Record<string, unknown> = {};
+
+  if (status) {
+    filter.status = status;
+  }
+
+  const productReviews = await ProductReview.find(filter)
+    .populate("productId", "name slug")
+    .populate("customerId", "name")
+    .skip(skip)
+    .limit(limit);
+
+  const totalProductReviews = await ProductReview.countDocuments(filter);
+  const totalPages = Math.ceil(totalProductReviews / limit);
+
+  return {
+    productReviews,
+    pagination: {
+      page,
+      limit,
+      totalProductReviews,
+      totalPages,
+    },
+  };
+};

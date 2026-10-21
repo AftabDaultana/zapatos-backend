@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { verifyUser } from "../middleware/authMiddleware.js";
+import { verifyAdmin, verifyUser } from "../middleware/authMiddleware.js";
 import { validate } from "../middleware/validate.js";
 import { createProductReviewSchema } from "../validators/productReviewValidator.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   createProductReview,
+  getAllProductReviews,
   getUserProductReviews,
 } from "../controllers/productReviewController.js";
 
@@ -17,5 +18,11 @@ router.post(
   asyncHandler(createProductReview),
 );
 router.get("/user", verifyUser, asyncHandler(getUserProductReviews));
+router.get(
+  "/admin",
+  verifyUser,
+  verifyAdmin,
+  asyncHandler(getAllProductReviews),
+);
 
 export default router;
