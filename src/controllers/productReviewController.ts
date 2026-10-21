@@ -4,6 +4,7 @@ import {
   getAllProductReviewsService,
   getCurrentUserProductReviewsService,
   getProductReviewsService,
+  updateProductReviewStatusService,
 } from "../services/productReviewService.js";
 import AppError from "../utils/AppError.js";
 
@@ -114,5 +115,24 @@ export const getProductReviews = async (req: Request, res: Response) => {
     success: true,
     message: `Product reviews for product ID: ${productId} fetched successfully`,
     data: productReviews,
+  });
+};
+
+export const updateProductReviewStatus = async (
+  req: Request,
+  res: Response,
+) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const updatedProductReview = await updateProductReviewStatusService(
+    id as string,
+    status,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Status of product review updated sccessfully.",
+    data: updateProductReviewStatus,
   });
 };

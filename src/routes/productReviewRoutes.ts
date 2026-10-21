@@ -8,6 +8,7 @@ import {
   getAllProductReviews,
   getCurrentUserProductReviews,
   getProductReviews,
+  updateProductReviewStatus,
 } from "../controllers/productReviewController.js";
 
 const router = Router();
@@ -26,5 +27,11 @@ router.get(
   asyncHandler(getAllProductReviews),
 );
 router.get("/:productId", asyncHandler(getProductReviews));
+router.patch(
+  "/status/:id",
+  verifyUser,
+  verifyAdmin,
+  asyncHandler(updateProductReviewStatus),
+);
 
 export default router;

@@ -2,6 +2,7 @@ import AppError from "../utils/AppError.js";
 import ProductReview from "../models/productReview.js";
 import Product from "../models/product.js";
 import { getPagination } from "../utils/pagination.js";
+import mongoose from "mongoose";
 
 export const createProductReviewService = async (
   heading: string,
@@ -144,4 +145,126 @@ export const getProductReviewsService = async (
       totalPages,
     },
   };
+};
+
+export const updateProductReviewStatusService = async (
+  id: string,
+  status: "unapproved" | "approved" | "rejected",
+) => {
+  const session = await mongoose.startSession();
+  let result:
+    | {
+        productReview: InstanceType<typeof ProductReview>;
+        product: InstanceType<typeof Product>;
+      }
+    | undefined;
+
+  try {
+    await session.withTransaction(async () => {
+      const productReview = await ProductReview.findById(id).session(session);
+
+      if (!productReview) {
+        throw new AppError("Product review not found", 404);
+      }
+
+      const product = await Product.findById(productReview.productId)
+        .select("_id name slug rating ratingCount")
+        .session(session);
+
+      if (!product) {
+        throw new AppError("Product not found", 404);
+      }
+
+      if (productReview.status === "approved") {
+        if (status === "rejected" || status === "unapproved") {
+          const updatedStatus = status;
+          if (product.ratingCount > 1) {
+            const updatedRating = Number(
+              (
+                (product.rating * product.ratingCount - productReview.rating) /
+                (product.ratingCount - 1)
+              ).toFixed(1),
+            );
+            const updatedRatingCount = product.ratingCount - 1;
+
+            productReview.status = updatedStatus;
+            await productReview.save({ session });
+
+            product.rating = updatedRating;
+            product.ratingCount = updatedRatingCount;
+
+            await product.save({ session });
+
+            result = {
+              productReview,
+              product,
+            };
+          } else {
+            const updatedRating = 0;
+            const updatedRatingCount = 0;
+
+            productReview.status = updatedStatus;
+            await productReview.save({ session });
+
+            product.rating = updatedRating;
+            product.ratingCount = updatedRatingCount;
+
+            await product.save({ session });
+
+            result = {
+              productReview,
+              product,
+            };
+          }
+        } else {
+          result = {
+            productReview,
+            product,
+          };
+        }
+      } else if (
+        productReview.status === "unapproved" ||
+        productReview.status === "rejected"
+      ) {
+        if (status === "approved") {
+          const updatedStatus = status;
+          const updatedRating = Number(
+            (
+              (product.rating * product.ratingCount + productReview.rating) /
+              (product.ratingCount + 1)
+            ).toFixed(1),
+          );
+          const updatedRatingCount = product.ratingCount + 1;
+
+          productReview.status = updatedStatus;
+          await productReview.save({ session });
+
+          product.rating = updatedRating;
+          product.ratingCount = updatedRatingCount;
+
+          await product.save({ session });
+
+          result = {
+            productReview,
+            product,
+          };
+        } else {
+          result = {
+            productReview,
+            product,
+          };
+        }
+      } else {
+        productReview.status = status;
+        await productReview.save({ session });
+        result = {
+          productReview,
+          product,
+        };
+      }
+    });
+    return result;
+  } finally {
+    await session.endSession();
+  }
 };
