@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
 import {
   createProductReviewService,
+  deleteProductReviewService,
   getAllProductReviewsService,
   getCurrentUserProductReviewsService,
   getProductReviewsService,
+  updateProductReviewService,
   updateProductReviewStatusService,
 } from "../services/productReviewService.js";
 import AppError from "../utils/AppError.js";
@@ -134,5 +136,41 @@ export const updateProductReviewStatus = async (
     success: true,
     message: "Status of product review updated sccessfully.",
     data: updateProductReviewStatus,
+  });
+};
+
+export const updateProductReview = async (req: Request, res: Response) => {
+  const customerId = req.userId;
+  const { id } = req.params;
+  const { heading, content, rating } = req.body;
+
+  const updatedProductReview = await updateProductReviewService(
+    id as string,
+    customerId as string,
+    heading,
+    content,
+    rating,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Product review updated successfully",
+    data: updatedProductReview,
+  });
+};
+
+export const deleteProductReview = async (req: Request, res: Response) => {
+  const customerId = req.userId;
+  const { id } = req.params;
+
+  const deletedProductReview = await deleteProductReviewService(
+    id as string,
+    customerId as string,
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Product review deleted successfully.",
+    data: deletedProductReview,
   });
 };

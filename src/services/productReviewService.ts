@@ -268,3 +268,168 @@ export const updateProductReviewStatusService = async (
     await session.endSession();
   }
 };
+
+export const updateProductReviewService = async (
+  id: string,
+  customerId: string,
+  heading?: string,
+  content?: string,
+  rating?: 1 | 2 | 3 | 4 | 5,
+) => {
+  const session = await mongoose.startSession();
+
+  try {
+    let result:
+      | {
+          product: InstanceType<typeof Product>;
+          productReview: InstanceType<typeof ProductReview>;
+        }
+      | undefined;
+
+    await session.withTransaction(async () => {
+      const productReview = await ProductReview.findById(id).session(session);
+
+      if (!productReview) {
+        throw new AppError("Product review does not exist", 404);
+      }
+
+      if (productReview.customerId.toString() !== customerId) {
+        throw new AppError(
+          "You are not allowed to update this product review.",
+          403,
+        );
+      }
+
+      const previousStatus = productReview.status;
+      const previousRating = productReview.rating;
+
+      const product = await Product.findById(productReview.productId)
+        .select("_id name rating ratingCount")
+        .session(session);
+
+      if (!product) {
+        throw new AppError("Product not found", 404);
+      }
+
+      if (heading !== undefined) {
+        productReview.heading = heading;
+      }
+
+      if (content !== undefined) {
+        productReview.content = content;
+      }
+
+      if (rating !== undefined) {
+        productReview.rating = rating;
+      }
+
+      if (previousStatus === "approved") {
+        const updatedRatingCount = product.ratingCount - 1;
+
+        if (updatedRatingCount <= 0) {
+          product.rating = 0;
+          product.ratingCount = 0;
+        } else {
+          product.rating = Number(
+            (
+              (product.rating * product.ratingCount - previousRating) /
+              updatedRatingCount
+            ).toFixed(1),
+          );
+
+          product.ratingCount = updatedRatingCount;
+        }
+
+        await product.save({ session });
+      } else if (
+        previousStatus === "unapproved" ||
+        previousStatus === "rejected"
+      ) {
+        // No product rating changes are needed.
+      }
+
+      productReview.status = "unapproved";
+
+      await productReview.save({ session });
+
+      result = {
+        product,
+        productReview,
+      };
+    });
+
+    if (!result) {
+      throw new AppError("Failed to update product review", 500);
+    }
+
+    return result;
+  } finally {
+    await session.endSession();
+  }
+};
+
+export const deleteProductReviewService = async (
+  id: string,
+  customerId: string,
+) => {
+  const session = await mongoose.startSession();
+
+  try {
+    let deletedProductReview: InstanceType<typeof ProductReview> | undefined;
+
+    await session.withTransaction(async () => {
+      const productReview = await ProductReview.findById(id).session(session);
+
+      if (!productReview) {
+        throw new AppError("Product review does not exist", 404);
+      }
+
+      if (productReview.customerId.toString() !== customerId) {
+        throw new AppError(
+          "You are not allowed to delete this product review.",
+          403,
+        );
+      }
+
+      if (productReview.status === "approved") {
+        const product = await Product.findById(productReview.productId)
+          .select("_id rating ratingCount")
+          .session(session);
+
+        if (!product) {
+          throw new AppError("Product not found", 404);
+        }
+
+        const updatedRatingCount = product.ratingCount - 1;
+
+        if (updatedRatingCount <= 0) {
+          product.rating = 0;
+          product.ratingCount = 0;
+        } else {
+          product.rating = Number(
+            (
+              (product.rating * product.ratingCount - productReview.rating) /
+              updatedRatingCount
+            ).toFixed(1),
+          );
+
+          product.ratingCount = updatedRatingCount;
+        }
+
+        await product.save({ session });
+      }
+
+      deletedProductReview = productReview;
+
+      await ProductReview.deleteOne({ _id: id }).session(session);
+    });
+
+    if (!deletedProductReview) {
+      throw new AppError("Failed to delete product review", 500);
+    }
+
+    return deletedProductReview;
+  } finally {
+    await session.endSession();
+  }
+};

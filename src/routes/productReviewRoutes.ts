@@ -5,9 +5,11 @@ import { createProductReviewSchema } from "../validators/productReviewValidator.
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   createProductReview,
+  deleteProductReview,
   getAllProductReviews,
   getCurrentUserProductReviews,
   getProductReviews,
+  updateProductReview,
   updateProductReviewStatus,
 } from "../controllers/productReviewController.js";
 
@@ -20,6 +22,7 @@ router.post(
   asyncHandler(createProductReview),
 );
 router.get("/user", verifyUser, asyncHandler(getCurrentUserProductReviews));
+router.put("/user/:id", verifyUser, asyncHandler(updateProductReview));
 router.get(
   "/admin",
   verifyUser,
@@ -33,5 +36,6 @@ router.patch(
   verifyAdmin,
   asyncHandler(updateProductReviewStatus),
 );
+router.delete("/:id", verifyUser, asyncHandler(deleteProductReview));
 
 export default router;
