@@ -31,7 +31,7 @@ router.get(
 );
 router.get("/:productId", asyncHandler(getProductReviews));
 router.patch(
-  "/status/:id",
+  "/admin/status/:id",
   verifyUser,
   verifyAdmin,
   asyncHandler(updateProductReviewStatus),

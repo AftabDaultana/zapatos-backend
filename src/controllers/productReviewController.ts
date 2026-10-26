@@ -135,7 +135,7 @@ export const updateProductReviewStatus = async (
   return res.status(200).json({
     success: true,
     message: "Status of product review updated sccessfully.",
-    data: updateProductReviewStatus,
+    data: updateProductReview,
   });
 };
 
