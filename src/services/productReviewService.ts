@@ -3,6 +3,7 @@ import ProductReview from "../models/productReview.js";
 import Product from "../models/product.js";
 import { getPagination } from "../utils/pagination.js";
 import mongoose from "mongoose";
+import User from "../models/user.js";
 
 export const createProductReviewService = async (
   heading: string,
@@ -80,12 +81,23 @@ export const getAllProductReviewsService = async (
   page: number,
   limit: number,
   status?: "unapproved" | "approved" | "rejected",
+  search?: string,
 ) => {
   const { skip } = getPagination({ page, limit });
   const filter: Record<string, unknown> = {};
 
   if (status) {
     filter.status = status;
+  }
+
+  if (search?.trim()) {
+    const customers = await User.find({
+      name: { $regex: search.trim(), $options: "i" },
+    }).select("_id");
+
+    filter.customerId = {
+      $in: customers.map((customer) => customer._id),
+    };
   }
 
   const productReviews = await ProductReview.find(filter)

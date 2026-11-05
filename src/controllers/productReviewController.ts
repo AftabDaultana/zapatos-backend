@@ -91,9 +91,22 @@ export const getAllProductReviews = async (req: Request, res: Response) => {
     }
   }
 
+  const querySearch = req.query.search;
+
+  if (querySearch !== undefined && typeof querySearch !== "string") {
+    throw new AppError("Invalid search parameter", 400);
+  }
+
   const status = queryStatus as (typeof allowedStatuses)[number] | undefined;
 
-  const productReviews = await getAllProductReviewsService(page, limit, status);
+  const search = querySearch?.trim();
+
+  const productReviews = await getAllProductReviewsService(
+    page,
+    limit,
+    status,
+    search,
+  );
 
   return res.status(200).json({
     success: true,
