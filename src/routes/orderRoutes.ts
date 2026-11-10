@@ -18,11 +18,13 @@ import {
   getOrderById,
   updateOrderStatus,
 } from "../controllers/orderController.js";
+import { orderRateLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
 router.post(
   "/",
+  orderRateLimiter,
   optionalVerifyUser,
   validate(createOrderSchema),
   asyncHandler(createOrder),

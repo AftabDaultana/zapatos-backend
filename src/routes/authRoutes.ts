@@ -20,30 +20,51 @@ import {
 import asyncHandler from "../utils/asyncHandler.js";
 import { verifyPasswordResetToken } from "../middleware/authMiddleware.js";
 import { refresh } from "../controllers/refreshController.js";
+import {
+  forgotPasswordRateLimiter,
+  loginRateLimiter,
+  refreshTokenLimiter,
+  registerRateLimiter,
+  resetPasswordRateLimiter,
+  verifyOtpRateLimiter,
+} from "../middleware/rateLimiter.js";
 
 const router = Router();
 
-router.post("/register", validate(registerSchema), asyncHandler(register));
-router.post("/login", validate(loginSchema), asyncHandler(login));
+router.post(
+  "/register",
+  registerRateLimiter,
+  validate(registerSchema),
+  asyncHandler(register),
+);
+router.post(
+  "/login",
+  loginRateLimiter,
+  validate(loginSchema),
+  asyncHandler(login),
+);
 router.post("/logout", asyncHandler(logout));
 router.post(
   "/forgot-password",
+  forgotPasswordRateLimiter,
   validate(forgotPasswordSchema),
   asyncHandler(forgotPassword),
 );
 router.post(
   "/verify-otp",
+  verifyOtpRateLimiter,
   validate(verifyOTPSchema),
   verifyPasswordResetToken,
   asyncHandler(verifyOTP),
 );
 router.post(
   "/reset-password",
+  resetPasswordRateLimiter,
   validate(passwordResetSchema),
   verifyPasswordResetToken,
   asyncHandler(resetPassword),
 );
-router.post("/refresh", asyncHandler(refresh));
+router.post("/refresh", refreshTokenLimiter, asyncHandler(refresh));
 
 router.get(
   "/google",
