@@ -22,7 +22,7 @@ export const refresh = async (req: Request, res: Response) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/api/auth/refresh",
+    path: "/api/v1/auth/refresh",
   });
 
   return res.status(200).json({

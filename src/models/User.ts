@@ -11,7 +11,8 @@ export interface IAddress {
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string;
+  googleId?: string;
   phoneNumber?: string;
   profilePicture?: string;
   role: "user" | "admin";
@@ -59,8 +60,12 @@ const userSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      required: true,
       minLength: 6,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
     phoneNumber: {
       type: String,

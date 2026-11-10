@@ -1,5 +1,7 @@
 import Router from "express";
 import { validate } from "../middleware/validate.js";
+import passport from "../config/passport.js";
+import { googleLogin } from "../controllers/authController.js";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -42,5 +44,21 @@ router.post(
   asyncHandler(resetPassword),
 );
 router.post("/refresh", asyncHandler(refresh));
+
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  }),
+);
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
+  }),
+  asyncHandler(googleLogin),
+);
 
 export default router;

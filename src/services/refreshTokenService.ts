@@ -28,7 +28,7 @@ export const refreshTokenService = async (refreshTokenValue: string) => {
     generateRefreshToken();
 
   storedToken.tokenHash = newTokenHash;
-  storedToken.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  storedToken.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
   await storedToken.save();
 
   return { accessToken: newAccessToken, refreshToken: newRefreshTokenValue };

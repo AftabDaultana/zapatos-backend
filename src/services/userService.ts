@@ -133,6 +133,13 @@ export const changePasswordService = async (
     throw new AppError("User not found", 404);
   }
 
+  if (!user.password) {
+    throw new AppError(
+      "This account uses Google sign-in and does not have a password.",
+      400,
+    );
+  }
+
   const matchCurrentPassword = await bcrypt.compare(
     currentPassword,
     user.password,

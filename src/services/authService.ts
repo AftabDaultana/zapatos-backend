@@ -59,6 +59,13 @@ export const loginService = async (
     );
   }
 
+  if (!user.password) {
+    throw new AppError(
+      "This account uses Google sign-in. Please continue with Google.",
+      401,
+    );
+  }
+
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
@@ -244,4 +251,39 @@ export const resetPasswordService = async (
   });
 
   return user;
+};
+
+export const googleLoginService = async (userId: string) => {
+  const user = await User.findById(userId).select("-createdAt -updatedAt -__v");
+
+  if (!user) {
+    throw new AppError("User not found.", 404);
+  }
+
+  if (user.status !== "active") {
+    throw new AppError(
+      "Your account is disabled. Please contact support.",
+      403,
+    );
+  }
+
+  const accessToken = generateToken(user._id.toString(), "15m");
+
+  const { token: refreshToken, tokenHash } = generateRefreshToken();
+
+  await RefreshToken.create({
+    userId: user._id,
+    tokenHash,
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+  });
+
+  const userData = user.toObject();
+
+  delete userData.password;
+
+  return {
+    user: userData,
+    accessToken,
+    refreshToken,
+  };
 };

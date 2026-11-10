@@ -2,6 +2,7 @@ import type { Response, Request } from "express";
 
 import {
   forgotPasswordService,
+  googleLoginService,
   loginService,
   logoutService,
   registerService,
@@ -129,4 +130,37 @@ export const resetPassword = async (req: Request, res: Response) => {
     success: true,
     message: "Password reset successfully",
   });
+};
+
+export const googleLogin = async (req: Request, res: Response) => {
+  const userId = req.user?._id.toString();
+  console.log("Google callback controller reached");
+  console.log("Authenticated user:", req.user?._id);
+
+  if (!userId) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
+    );
+  }
+
+  console.log("Calling googleLoginService...");
+
+  const { user, accessToken, refreshToken } = await googleLoginService(userId);
+
+  console.log("Google login service completed");
+
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/api/v1/auth/refresh",
+  });
+
+  return res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
 };

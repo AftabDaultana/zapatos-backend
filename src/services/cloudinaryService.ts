@@ -63,3 +63,42 @@ export const uploadImageToCloudinary = (
     }
   });
 };
+
+export const uploadRemoteImageToCloudinary = async (
+  imageUrl: string,
+  folder: string,
+) => {
+  const url = new URL(imageUrl);
+
+  if (
+    url.protocol !== "https:" ||
+    !(
+      url.hostname === "googleusercontent.com" ||
+      url.hostname.endsWith(".googleusercontent.com")
+    )
+  ) {
+    throw new Error("Invalid Google profile image URL");
+  }
+
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to download Google profile picture");
+  }
+
+  const contentType = response.headers.get("content-type");
+
+  if (!contentType?.startsWith("image/")) {
+    throw new Error("Google profile URL did not return an image");
+  }
+
+  const imageBuffer = Buffer.from(await response.arrayBuffer());
+
+  if (imageBuffer.length > 5 * 1024 * 1024) {
+    throw new Error("Profile picture exceeds the 5 MB limit");
+  }
+
+  return uploadImageToCloudinary(imageBuffer, folder);
+};

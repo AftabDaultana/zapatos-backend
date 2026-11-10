@@ -4,6 +4,7 @@ dotenv.config();
 import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
+import passport from "./config/passport.js";
 
 import { connectDB } from "./config/db.js";
 
@@ -36,6 +37,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use(passport.initialize());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/cart", cartRoutes);
