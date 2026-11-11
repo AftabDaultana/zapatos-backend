@@ -39,7 +39,7 @@ export const login = async (req: Request, res: Response) => {
   res.cookie("token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     ...(rememberMe && {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     }),
@@ -49,7 +49,7 @@ export const login = async (req: Request, res: Response) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/api/v1/auth/refresh",
     });
   }
@@ -71,13 +71,13 @@ export const logout = async (req: Request, res: Response) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/api/v1/auth/refresh",
   });
 
@@ -95,7 +95,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
   res.cookie("passwordResetToken", passwordResetToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 20 * 60 * 1000,
   });
 
@@ -123,7 +123,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   res.clearCookie("passwordResetToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   return res.status(200).json({
@@ -134,8 +134,6 @@ export const resetPassword = async (req: Request, res: Response) => {
 
 export const googleLogin = async (req: Request, res: Response) => {
   const userId = req.user?._id.toString();
-  console.log("Google callback controller reached");
-  console.log("Authenticated user:", req.user?._id);
 
   if (!userId) {
     return res.redirect(
@@ -143,22 +141,18 @@ export const googleLogin = async (req: Request, res: Response) => {
     );
   }
 
-  console.log("Calling googleLoginService...");
-
   const { user, accessToken, refreshToken } = await googleLoginService(userId);
-
-  console.log("Google login service completed");
 
   res.cookie("token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/api/v1/auth/refresh",
   });
 
