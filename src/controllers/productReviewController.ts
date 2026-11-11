@@ -99,7 +99,8 @@ export const getAllProductReviews = async (req: Request, res: Response) => {
 
   const status = queryStatus as (typeof allowedStatuses)[number] | undefined;
 
-  const search = querySearch?.trim();
+  const search =
+    typeof querySearch === "string" ? querySearch.trim() : undefined;
 
   const productReviews = await getAllProductReviewsService(
     page,
