@@ -39,6 +39,15 @@ app.use(
 );
 app.use(passport.initialize());
 
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/users", userRoutes);
@@ -59,18 +68,22 @@ app.get("/", (req, res) => {
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    await seedAdmin();
+export default app;
 
-    app.listen(port, () => {
-      console.log(`Zapatos API listening on port ${port}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-};
+if (process.env.VERCEL !== "1") {
+  const startServer = async () => {
+    try {
+      await connectDB();
+      await seedAdmin();
 
-startServer();
+      app.listen(port, () => {
+        console.log(`Zapatos API listening on port ${port}`);
+      });
+    } catch (error) {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    }
+  };
+
+  startServer();
+}
